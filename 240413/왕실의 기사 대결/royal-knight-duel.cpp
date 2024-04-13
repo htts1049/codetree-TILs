@@ -87,12 +87,6 @@ bool isMovable(int id, int d) {
 			
 			// 다음 위치가 격자 밖이거나, 벽이면 무조건 false
 			if (!isRange(y, x) || map[y][x].val == 2) {
-				/*if (!isRange(y, x)) {
-					cout << endl << "isRange ERROR!! : " << y << ", " << x;
-				}
-				else {
-					cout << endl << "Wall ERROR!! : " << y << ", " << x;
-				}*/
 				return false;
 			}
 			
@@ -102,7 +96,6 @@ bool isMovable(int id, int d) {
 				visited[map[y][x].id] = true;
 				movingKnights.push_back(map[y][x].id);
 				
-				// cout << " " << map[y][x].id;
 				ret = ret && isMovable(map[y][x].id, d);
 			}
 		}
@@ -147,24 +140,14 @@ int main() {
 		cin >> cmds[i].i >> cmds[i].d;
 	}
 
-	//// 디버깅
-	//cout << endl;
-	//for (int y = 1; y <= l; y++) {
-	//	for (int x = 1; x <= l; x++) {
-	//		cout << map[y][x].id << " ";
-	//	}
-	//	cout << endl;
-	//}
-	//cout << endl;
-
+	
 
 	// 1~q턴 까지 진행
 	for (int i = 1; i <= q; i++) {
 		int id = cmds[i].i;
 		int d = cmds[i].d;
 
-		//cout << i << "턴 : " << i << "번 기사 " << str[d] << "이동 " << endl;
-
+		
 		// 1. id번 기사가 사라졌으면 무시
 		if (knights[id].k <= 0) continue;
 
@@ -172,8 +155,6 @@ int main() {
 		visited[id] = true;
 		movingKnights.push_back(id);
 		
-		// cout << "isMovable : " << id;
-		// cout << endl;
 		bool flag = isMovable(id, d);
 
 		// 3. 이동 가능하면 데미지 입음
@@ -181,16 +162,14 @@ int main() {
 
 			// 기사 이동
 			for (int i = 0; i < movingKnights.size(); i++) {
-				
-				// 이동
+
 				knightMove(movingKnights[i], d);
 			}
-
-			
-
+;			
 			// 4. 이동을 map에 적용
-			for (int y = 0; y < l; y++) {
-				for (int x = 0; x < l; x++) {
+
+			for (int y = 1; y <= l; y++) {
+				for (int x = 1; x <= l; x++) {
 
 					// 복사할 자리가 이동할 기사가 아니면 복사
 					if (!visited[map[y][x].id]) {
@@ -201,6 +180,7 @@ int main() {
 					}
 				}
 			}
+			
 
 			// 이동한 기사는 새롭게 적용
 			for (int i = 0; i < movingKnights.size(); i++) {
@@ -208,14 +188,14 @@ int main() {
 
 				for (int y = mover.r; y < mover.r + mover.h; y++) {
 					for (int x = mover.c; x < mover.c + mover.w; x++) {
-						backup[y][x].id = i;
+						backup[y][x].id = movingKnights[i];
 					}
 				}
 			}
 
 			// 복사본 저장
-			for (int y = 0; y < l; y++) {
-				for (int x = 0; x < l; x++) {
+			for (int y = 1; y <= l; y++) {
+				for (int x = 1; x <= l; x++) {
 					map[y][x].id = backup[y][x].id;
 				}
 			}
@@ -223,7 +203,7 @@ int main() {
 			// 5. 데미지 입음
 			for (int i = 0; i < movingKnights.size(); i++) {
 
-				if (i == id) continue;
+				if (movingKnights[i] == id) continue;
 
 				knight mover = knights[movingKnights[i]];
 
@@ -241,6 +221,19 @@ int main() {
 
 				knights[movingKnights[i]].sum += sum;
 				knights[movingKnights[i]].k -= sum;
+
+
+				// 체력이 다하면 삭제
+				if (knights[movingKnights[i]].k <= 0) {
+					
+					knight die = knights[movingKnights[i]];
+
+					for (int y = die.r; y < die.r + die.h; y++) {
+						for (int x = die.c; x < die.c + die.w; x++) {
+							map[y][x].id = 0;
+						}
+					}
+				}
 			}
 		}
 
@@ -250,20 +243,7 @@ int main() {
 		visitedInit();
 		movingKnights.clear();
 
-		// 디버깅
-		/*cout << endl;
-		for (int y = 1; y <= l; y++) {
-			for (int x = 1; x <= l; x++) {
-				cout << map[y][x].id << " ";
-			}
-			cout << endl;
-		}*/
-		/*cout << "HP : ";
-		for (int i = 1; i <= n; i++) {
-			cout << knights[i].k << " ";
-		}
-		cout << endl;*/
-		//cout << endl;
+		
 	}
 
 	// 생존한 기사의 총 피해 합 출력
